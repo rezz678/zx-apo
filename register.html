@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZETXITERS - Daftar</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="auth-body">
+    <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo-small">Z</div>
+            <h2 class="auth-title">BUAT AKUN</h2>
+            <p class="auth-subtitle">BERGABUNG DENGAN KAMI</p>
+        </div>
+
+        <div class="auth-form">
+            <div class="input-field">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" id="email" placeholder=" " autocomplete="off">
+                <label>Email</label>
+            </div>
+
+            <div class="input-field">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="username" placeholder=" " autocomplete="off">
+                <label>Username</label>
+            </div>
+
+            <div class="input-field">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="password" placeholder=" " autocomplete="new-password">
+                <label>Password</label>
+                <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+            </div>
+
+            <div class="input-field">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="confirmPassword" placeholder=" " autocomplete="new-password">
+                <label>Konfirmasi Password</label>
+            </div>
+
+            <div class="input-field">
+                <i class="fas fa-key input-icon"></i>
+                <input type="text" id="keyCode" placeholder=" " autocomplete="off" value="ZET-PREMIUM-30-001">
+                <label>Key Code (Wajib)</label>
+            </div>
+
+            <button class="auth-button" id="registerBtn">
+                <span>DAFTAR</span>
+                <i class="fas fa-user-plus"></i>
+            </button>
+
+            <!-- WA BUTTON -->
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="https://wa.me/6287833947151?text=Saya%20ingin%20beli%20key%20ZETXITERS" 
+                   target="_blank" 
+                   style="display: inline-flex; align-items: center; gap: 10px; background: #25D366; color: white; padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: 600;">
+                    <i class="fab fa-whatsapp"></i> BELI KEY VIA WA
+                </a>
+                <p style="font-size: 0.8rem; color: #8e98b3; margin-top: 10px;">
+                    Admin: 0878-3394-7151
+                </p>
+            </div>
+        </div>
+
+        <div class="auth-footer">
+            <p>Sudah punya akun? <a href="login.html">Masuk</a></p>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- LOAD SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+        // ===== REGISTER PAGE SIMPLE =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Register page ready');
+            
+            const SUPABASE_URL = 'https://vdcsnfjxjfhcgoeivxrc.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkY3NuZmp4amZoY2dvZWl2eHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTQ3MzMsImV4cCI6MjA4NjkzMDczM30.XWGIHJMIoyy73xWmmPYqDcfj3FFDg3_UezAcbAbevZU';
+            
+            // Inisialisasi Supabase
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Toast function
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                if (!container) return;
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            
+            // Toggle password
+            const toggleBtn = document.getElementById('togglePassword');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    const password = document.getElementById('password');
+                    const type = password.type === 'password' ? 'text' : 'password';
+                    password.type = type;
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            // Register button
+            const registerBtn = document.getElementById('registerBtn');
+            if (registerBtn) {
+                registerBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    // Ambil data
+                    const email = document.getElementById('email').value.trim();
+                    const username = document.getElementById('username').value.trim();
+                    const password = document.getElementById('password').value.trim();
+                    const confirm = document.getElementById('confirmPassword').value.trim();
+                    const keyCode = document.getElementById('keyCode').value.trim();
+                    
+                    // Validasi sederhana
+                    if (!email || !username || !password || !confirm || !keyCode) {
+                        showToast('Semua field harus diisi!', 'error');
+                        return;
+                    }
+                    
+                    if (password !== confirm) {
+                        showToast('Password tidak cocok!', 'error');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        showToast('Password minimal 6 karakter!', 'error');
+                        return;
+                    }
+                    
+                    // Loading
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<span>PROSES...</span><i class="fas fa-spinner fa-spin"></i>';
+                    this.disabled = true;
+                    
+                    try {
+                        // Cek key dulu
+                        const { data: keyData, error: keyError } = await supabase
+                            .from('key_store')
+                            .select('*')
+                            .eq('key_code', keyCode)
+                            .eq('is_sold', false)
+                            .maybeSingle();
+                        
+                        if (keyError || !keyData) {
+                            showToast('Key tidak valid atau sudah digunakan!', 'error');
+                            this.innerHTML = originalText;
+                            this.disabled = false;
+                            return;
+                        }
+                        
+                        // Register user
+                        const { data, error } = await supabase.auth.signUp({
+                            email: email,
+                            password: password,
+                            options: {
+                                data: {
+                                    username: username,
+                                    key_code: keyCode
+                                }
+                            }
+                        });
+                        
+                        if (error) throw error;
+                        
+                        // Activate key
+                        if (data.user) {
+                            const expiredAt = keyData.duration_days ? 
+                                new Date(Date.now() + keyData.duration_days * 24 * 60 * 60 * 1000) : null;
+                            
+                            await supabase.from('subscriptions').insert({
+                                user_id: data.user.id,
+                                key_code: keyCode,
+                                key_type: keyData.key_type,
+                                duration_days: keyData.duration_days,
+                                expired_at: expiredAt,
+                                is_active: true
+                            });
+                            
+                            await supabase
+                                .from('key_store')
+                                .update({ is_sold: true, sold_to: data.user.id, sold_at: new Date() })
+                                .eq('id', keyData.id);
+                        }
+                        
+                        showToast('Registrasi berhasil! Silakan login', 'success');
+                        
+                        // Reset form
+                        document.getElementById('email').value = '';
+                        document.getElementById('username').value = '';
+                        document.getElementById('password').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                        document.getElementById('keyCode').value = '';
+                        
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                        
+                    } catch (error) {
+                        showToast(error.message, 'error');
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }
+                });
+            }
+            
+            // Simple particles
+            const canvas = document.getElementById('particleCanvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                let particles = [];
+                
+                function resize() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                
+                resize();
+                
+                for (let i = 0; i < 20; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 0.2,
+                        vy: (Math.random() - 0.5) * 0.2,
+                        size: Math.random() * 2 + 1
+                    });
+                }
+                
+                function animate() {
+                    if (!ctx || !canvas) return;
+                    
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    particles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        
+                        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                        
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(0, 102, 255, 0.2)';
+                        ctx.fill();
+                    });
+                    
+                    requestAnimationFrame(animate);
+                }
+                
+                animate();
+                window.addEventListener('resize', resize);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZETXITERS - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="auth-body">
+    <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo-small">Z</div>
+            <h2 class="auth-title">ZETXITERS</h2>
+            <p class="auth-subtitle">APOCALYPSE</p>
+        </div>
+
+        <div class="auth-form">
+            <div class="input-field">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" id="email" placeholder=" " value="admin@zetxiters.com">
+                <label>Email</label>
+            </div>
+
+            <div class="input-field">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="password" placeholder=" " value="Admin123!">
+                <label>Password</label>
+                <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+            </div>
+
+            <button class="auth-button" id="loginBtn">
+                <span>MASUK</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="auth-footer">
+            <p>Belum punya akun? <a href="register.html">Daftar</a></p>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- LOAD SCRIPTS DENGAN URUTAN BENAR -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+        // ===== LOGIN PAGE SEDERHANA =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Login page ready');
+            
+            const SUPABASE_URL = 'https://vdcsnfjxjfhcgoeivxrc.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkY3NuZmp4amZoY2dvZWl2eHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTQ3MzMsImV4cCI6MjA4NjkzMDczM30.XWGIHJMIoyy73xWmmPYqDcfj3FFDg3_UezAcbAbevZU';
+            
+            // Inisialisasi Supabase
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Toast function
+            window.showToast = function(message, type = 'success') {
+                const container = document.getElementById('toastContainer');
+                if (!container) return;
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            };
+            
+            // Toggle password
+            const toggleBtn = document.getElementById('togglePassword');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    const password = document.getElementById('password');
+                    const type = password.type === 'password' ? 'text' : 'password';
+                    password.type = type;
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            // Login button
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value.trim();
+                    
+                    if (!email || !password) {
+                        showToast('Email dan password harus diisi!', 'error');
+                        return;
+                    }
+                    
+                    // Loading state
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<span>PROSES...</span><i class="fas fa-spinner fa-spin"></i>';
+                    this.disabled = true;
+                    
+                    try {
+                        const { data, error } = await supabase.auth.signInWithPassword({
+                            email: email,
+                            password: password
+                        });
+                        
+                        if (error) throw error;
+                        
+                        showToast('Login berhasil!', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                        
+                    } catch (error) {
+                        showToast(error.message, 'error');
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }
+                });
+            }
+            
+            // Floating labels
+            document.querySelectorAll('.input-field input').forEach(input => {
+                if (input.value) {
+                    const label = input.nextElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        label.style.top = '0';
+                        label.style.fontSize = '0.8rem';
+                        label.style.background = '#1a1a2e';
+                        label.style.padding = '0 10px';
+                    }
+                }
+            });
+            
+            // Simple particles
+            const canvas = document.getElementById('particleCanvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                let particles = [];
+                
+                function resize() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                
+                resize();
+                
+                for (let i = 0; i < 20; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 0.2,
+                        vy: (Math.random() - 0.5) * 0.2,
+                        size: Math.random() * 2 + 1
+                    });
+                }
+                
+                function animate() {
+                    if (!ctx || !canvas) return;
+                    
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    particles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        
+                        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                        
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(0, 102, 255, 0.2)';
+                        ctx.fill();
+                    });
+                    
+                    requestAnimationFrame(animate);
+                }
+                
+                animate();
+                window.addEventListener('resize', resize);
+            }
+        });
+    </script>
+</body>
+</html>

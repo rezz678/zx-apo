@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZETXITERS - My Devices</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <a href="dashboard.html" class="btn btn-outline btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <div>
+                    <h2>MANAGE DEVICES</h2>
+                </div>
+            </div>
+        </header>
+
+        <div class="card">
+            <div class="table-container">
+                <table class="table" id="devicesTable">
+                    <thead>
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Device Name</th>
+                            <th>Model</th>
+                            <th>Last Active</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="devicesTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

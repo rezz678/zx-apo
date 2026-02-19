@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZETXITERS - Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <div class="logo-robotic tiny">Z</div>
+                <div class="header-info">
+                    <h2>ADMIN PANEL</h2>
+                    <span class="header-sub">ZETXITERS v8.0</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.html" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <button class="btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="admin-container" id="adminContent">
+            <!-- Content will be loaded dynamically -->
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Memuat admin panel...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
